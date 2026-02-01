@@ -7,8 +7,20 @@
 
 ## About App
 
-La siguiente aplicación muestra el juego del ahorcado en una versión web. Ha sido programado en PHP 8.0 usando el framework Laravel 8. 
-Dada la simplicitud de la aplicación, no ha sido necesario integrar una base de datos.
+La siguiente aplicación muestra el juego del ahorcado en una versión web.  
+Ha sido programado en **PHP 8.0** usando el framework **Laravel 8**.  
+Dada la simplicidad de la aplicación, no ha sido necesario integrar una base de datos.
+
+## ⚙️ Instalación
+
+Ejecuta los siguientes comandos:
+
+```bash
+composer update
+cp .env.example .env
+php artisan key:generate
+php artisan serve
+```
 
 ## Funcionamiento
 
