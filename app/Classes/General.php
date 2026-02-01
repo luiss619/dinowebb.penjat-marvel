@@ -4,18 +4,15 @@ namespace App\Classes;
 
 use Illuminate\Support\Facades\Session;
 
-class General {
-    
-    /* DATA GAME */
-        
+class General 
+{
     /*
      * @ Título: Obtener lista de avatares disponibles para los jugadores
      * Descripción
      * Obtener array de avatares fijos
      * */
-    
-    public function get_array_avatares() {
-        
+    public function get_array_avatares() 
+    { 
         $array_avatares = array();
         $array_avatares[] = "/img/personajes/antman.jpg";
         $array_avatares[] = "/img/personajes/capitan_america.png";
@@ -25,7 +22,6 @@ class General {
         $array_avatares[] = "/img/personajes/thor.jpg";
         
         view()->share('array_avatares', $array_avatares);
-        
     }
     
     /*
@@ -33,30 +29,25 @@ class General {
      * Descripción
      * Lista de opciones para jugar obtenidas de fichero estático JSON
      * */
-    
-    public function get_data_to_game() {
-        
+    public function get_data_to_game() 
+    {
         $array_personajes = array();
         $data = file_get_contents("personajes.json");
         $personajes = json_decode($data, true);
         foreach ($personajes as $p) { $array_personajes[$p["id"]] = $p["value"]; }
         
         return $array_personajes;
-        
     }
     
     /* GENERAL FUNCTIONS */
-    
-    public function get_alphachar() {
-        
+    public function get_alphachar() 
+    {
         $array_alphabet = array();
         $alphachar = range('A', 'Z');
         foreach ($alphachar as $al) { $array_alphabet[$al] = 0; }
         
         return $array_alphabet;
-        
-    }    
-    
+    }
 }
 
 ?>

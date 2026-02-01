@@ -125,6 +125,9 @@ $(document).ready(function() {
 		        			if(id_position >= data["num_intents"]) { $(this).removeClass("d-none"); }
 		        		});
 		        	}
+					if(data['word'] && data['word'] != '') {
+						$(".word").html(data['word']);
+					}
 		        }
 		    });
 		}	

@@ -22,6 +22,8 @@
         			<div class="col-12 col-md-4">
         				<p class="intentos_text">Intents restants:</p>
         				<div class="intentos">{{ $jug['trys'] }}</div>
+						<hr>
+						<p class="word"></p>
         			</div>      		
     			</div>
         	</div>

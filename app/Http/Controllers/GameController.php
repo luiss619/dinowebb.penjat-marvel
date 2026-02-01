@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Classes\General;
+use App\Models\DataGame;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
-use App\Classes\General;
-use App\Models\DataGame;
-
-class GameController extends BaseController {
-    
+class GameController extends BaseController 
+{
     /*
      * @ Título: Principal - Vista del juego
      * Descripción
@@ -18,24 +17,20 @@ class GameController extends BaseController {
      * 1. Selección de jugadores
      * 2. Jugar al ahorcado
      * 3. Mostrar resultados
-     * */
-    
-    /* FUNCIONES AJAX PARA EL JUEGO */
-    
-    public function start(Request $request) {
-    	
+     * */  
+    public function start(Request $request) 
+    {
     	$General = new General();
     	$DataGame = new DataGame();
     	
-    	$title = "Penjat - Edició Online Marvel";        
+    	$title = __('Penjat - Edició Online Marvel');
     	$General->get_array_avatares();
     	
-    	$array_data = $DataGame->obtain_();
-    	$html_game_paso2 = $DataGame->get_html_game_paso2($array_data, $request); 
-    	$html_game_paso3 = $DataGame->get_html_game_paso3($array_data, $request); 
+    	$data_game = $DataGame->obtain_();
+    	$html_game_paso2 = $DataGame->get_html_game_paso2($data_game, $request); 
+    	$html_game_paso3 = $DataGame->get_html_game_paso3($data_game, $request); 
     	
-    	return view('start', compact('request', 'title', 'array_data', 'html_game_paso2', 'html_game_paso3'));
-    	
+    	return view('start', compact('request', 'title', 'data_game', 'html_game_paso2', 'html_game_paso3'));
     }
     
     /*
@@ -43,14 +38,12 @@ class GameController extends BaseController {
      * Descripción
      * Muestra el listado de jugadores según la cantidad seleccionada
      * */
-    
-    public function mostrar_jugadores(Request $request) {
-    	
+    public function mostrar_jugadores(Request $request) 
+    {
     	$num_jugadors = $request->num_jugadors;
     	$html_game_paso1 = view('parts.part1_jugador', compact('request', 'num_jugadors'));
     	
     	echo $html_game_paso1;
-    	
     }
     
     /*
@@ -65,18 +58,16 @@ class GameController extends BaseController {
      * - word: Palabra seleccionada aleatoriamente para el juego
      * - word_keygen: Palabra dividida por caracteres para controlar acierto/error
      * */
-    
-    public function guardar_jugadores(Request $request) {
-    	
+    public function guardar_jugadores(Request $request) 
+    {
     	$General = new General();
     	$DataGame = new DataGame();
     	
-    	$array_data = $DataGame->obtain_();
-    	$array_data = $DataGame->start_gaming($array_data, $request);    	
-    	$html_game_paso2 = $DataGame->get_html_game_paso2($array_data, $request);
+    	$data_game = $DataGame->obtain_();
+    	$data_game = $DataGame->start_gaming($data_game, $request);    	
+    	$html_game_paso2 = $DataGame->get_html_game_paso2($data_game, $request);
     	
     	echo $html_game_paso2;
-    	
     }
     
     /*
@@ -84,17 +75,15 @@ class GameController extends BaseController {
      * Descripción
      * Envíamos una letra de un jugador y comprobamos en la array word_keygen para ver el progreso del juego
      * */
-     
-    public function comprobar_letra(Request $request) {
-        
+    public function comprobar_letra(Request $request) 
+    {
         $General = new General();
         $DataGame = new DataGame();
         
-        $array_data = $DataGame->obtain_();
-        $respuesta = $DataGame->gaming_and_searching($array_data, $request);
+        $data_game = $DataGame->obtain_();
+        $respuesta = $DataGame->gaming_and_searching($data_game, $request);
         
         echo json_encode($respuesta);
-        
     }
     
     /*
@@ -102,19 +91,17 @@ class GameController extends BaseController {
      * Descripción
      * Todos los jugadores han terminado su turno, mostramos pantalla con resultados
      * */
-    
-    public function terminar_juego(Request $request) {
-        
+    public function terminar_juego(Request $request) 
+    {
         $General = new General();
         $DataGame = new DataGame();
         
-        $array_data = $DataGame->obtain_();
-        $array_data = $DataGame->close_game($array_data);
+        $data_game = $DataGame->obtain_();
+        $data_game = $DataGame->close_game($data_game);
         
         /* Cargamos parte final */
-        $html_game_paso3 = $DataGame->get_html_game_paso3($array_data, $request); 
+        $html_game_paso3 = $DataGame->get_html_game_paso3($data_game, $request); 
         echo $html_game_paso3;
-        
     }
     
     /*
@@ -122,20 +109,17 @@ class GameController extends BaseController {
      * Descripción
      * En la pantalla de resultados, escogemos si queremos una revancha o si empezamos otro juego con otros jugadores
      * */
-    
-    public function reiniciar(Request $request) {
-        
+    public function reiniciar(Request $request) 
+    {
         $General = new General();
         $DataGame = new DataGame();
         
         if($request->type == "comenzar_nuevo") { $DataGame->delete_(); }
         else {
-            $array_data = $DataGame->obtain_();
-            $DataGame->restart_($array_data);
+            $data_game = $DataGame->obtain_();
+            $DataGame->restart_($data_game);
         }
         
         return redirect("/");
-        
     }
-    
 }

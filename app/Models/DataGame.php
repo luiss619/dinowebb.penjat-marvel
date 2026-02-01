@@ -6,25 +6,23 @@ use Illuminate\Support\Facades\Session;
 
 use App\Classes\General;
 
-class DataGame {
-    
+class DataGame 
+{
     /*
      * @ Título: Obtener objeto inicial del juego
      * Descripción
      * Devuelve la array de jugadores en sesión si existe. Si no, la inicializa con los valores por defecto
      * */
-    
-    public function obtain_() {
-        
-        $array_data = array();
-        if (Session::has('array_data')) { $array_data = Session::get('array_data'); }
+    public function obtain_() 
+    {
+        $data_game = [];
+        if (Session::has('data_game')) { $data_game = Session::get('data_game'); }
         else {
-            $array_data["juego_empezado"] = 0;
-            $array_data["jugadores"] = array();
+            $data_game["started"] = 0;
+            $data_game["jugadores"] = [];
         }
         
-        return $array_data;
-        
+        return $data_game;
     }
     
     /*
@@ -32,12 +30,11 @@ class DataGame {
      * Descripción
      * Preparamos objeto para avanzar al paso 2 y comenzar a jugar 
      * */
-    
-    public function start_gaming($array_data, $request) {
-        
+    public function start_gaming($data_game, $request) 
+    {
         $General = new General();
         
-        $array_data["juego_empezado"] = 1;
+        $data_game["started"] = 1;
         $array_jugadores = json_decode($request->jugadores);
         if(is_array($array_jugadores) && count($array_jugadores) > 0) {
             /* Obtenemos datos aleatorios */
@@ -50,13 +47,12 @@ class DataGame {
                 $jugador["abc"] = $General->get_alphachar();
                 $jugador["word"] = strtoupper($array_personajes[$array_personajes_random[$ind_jug]]);
                 $jugador["word_keygen"] = $this->get_string_keygen($jugador["word"]);
-                $array_data["jugadores"][$jugador["id"]] = $jugador;
+                $data_game["jugadores"][$jugador["id"]] = $jugador;
             }
         }
-        Session::put('array_data', $array_data);
+        Session::put('data_game', $data_game);
         
-        return $array_data;
-        
+        return $data_game;
     }
     
     /*
@@ -64,10 +60,9 @@ class DataGame {
      * Descripción
      * Fragmentos palabra del juego en caracteres para controlar estado (descubierta o no)
      * */
-    
-    private function get_string_keygen($word) {
-        
-        $array_word = array();
+    private function get_string_keygen($word) 
+    {
+        $array_word = [];
         for($i=0; $i < strlen($word); $i++) {
             $char = $i;
             if($char != "" && $char != "-") { $char = ""; }
@@ -78,7 +73,6 @@ class DataGame {
         }
         
         return $array_word;
-        
     }
     
     /*
@@ -86,19 +80,18 @@ class DataGame {
      * Descripción
      * Mostramos zona jugando según el turno de cada jugador
      * */
-    
-    public function get_html_game_paso2($array_data, $request) {
-        
+    public function get_html_game_paso2($data_game, $request) 
+    {
         $General = new General();
         
         $html_juego = "";
-        if($array_data["juego_empezado"] == 1) {
-            if(count($array_data["jugadores"]) > 0) {
+        if($data_game["started"] == 1) {
+            if(count($data_game["jugadores"]) > 0) {
                 $current_player = false; $trobat_current_player = false;
-                foreach ($array_data["jugadores"] as $ind_jug => $jug) {
+                foreach ($data_game["jugadores"] as $ind_jug => $jug) {
                     if($jug["status"] == 0 && !$trobat_current_player) { $current_player = true; $trobat_current_player = true; }
                     $next_jug = ""; $jug["btn"] = "btn_continue_gaming_end";
-                    if($ind_jug < count($array_data["jugadores"])) { $jug["btn"] = "btn_continue_gaming_pass"; $next_jug = $ind_jug + 1; }
+                    if($ind_jug < count($data_game["jugadores"])) { $jug["btn"] = "btn_continue_gaming_pass"; $next_jug = $ind_jug + 1; }
                     $html_juego .= view('parts.part2_jugador', compact('request', 'jug', 'current_player', 'next_jug'));
                     if($current_player) { $current_player = false; }
                 }
@@ -106,7 +99,6 @@ class DataGame {
         }
         
         return $html_juego;
-        
     }
     
     /*
@@ -114,12 +106,11 @@ class DataGame {
      * Descripción
      * Comprobamos si la letra está en la palabra del juego y devolvemos estado del jugador hasta que acaba su turno.
      * */
-    
-    public function gaming_and_searching($array_data, $request) {
-        
+    public function gaming_and_searching($data_game, $request) 
+    {
         $respuesta = array("letter" => $request->letter, "new_letter_class" => "", "num_intents" => 0, "positions" => array(), "acabado_juego" => true);
-        if(array_key_exists($request->id_jugador, $array_data["jugadores"])) {
-            $jugador = $array_data["jugadores"][$request->id_jugador];
+        if(array_key_exists($request->id_jugador, $data_game["jugadores"])) {
+            $jugador = $data_game["jugadores"][$request->id_jugador];
             /* Buscamos si la letra existe */
             $trobat = false;
             foreach ($jugador["word_keygen"] as $in_word_keygen => $word_keygen) {
@@ -142,14 +133,17 @@ class DataGame {
                 }
             }
             /* Si el juego ha acabado, el jugador pierde su turno */
-            if($respuesta["acabado_juego"]) { $jugador["status"] = 1; }
+            if($respuesta["acabado_juego"]) { 
+                $jugador["status"] = 1;
+                $respuesta["word"] = $jugador["word"];
+            }
+
             /* Volvemos a cargar datos */
-            $array_data["jugadores"][$request->id_jugador] = $jugador;
-            Session::put('array_data', $array_data);
+            $data_game["jugadores"][$request->id_jugador] = $jugador;
+            Session::put('data_game', $data_game);
         }
-        
+
         return $respuesta;
-        
     }
     
     /*
@@ -157,14 +151,12 @@ class DataGame {
      * Descripción
      * Cuadno todos los jugadores acaban el turno, actualizamos estado del juego
      * */
-    
-    public function close_game($array_data) {
+    public function close_game($data_game) 
+    {
+        $data_game["started"] = 2;        
+        Session::put('data_game', $data_game);
         
-        $array_data["juego_empezado"] = 2;        
-        Session::put('array_data', $array_data);
-        
-        return $array_data;
-        
+        return $data_game;
     }
     
     /*
@@ -172,15 +164,14 @@ class DataGame {
      * Descripción
      * Devolvemos html con los resultados de ganadores/perdedores
      * */
-    
-    public function get_html_game_paso3($array_data, $request) {
-        
+    public function get_html_game_paso3($data_game, $request) 
+    {
         $General = new General();
         
         $html_juego = "";
-        if($array_data["juego_empezado"] == 2) {
+        if($data_game["started"] == 2) {
             $array_jugadores = array("ganadores" => array(), "perdedores" => array());
-            $jugadores = $array_data["jugadores"];
+            $jugadores = $data_game["jugadores"];
             foreach ($jugadores as $jug) {
                 if($jug["trys"] == 0) { $array_jugadores["perdedores"][] = $jug; }
                 else { $array_jugadores["ganadores"][] = $jug; }
@@ -189,7 +180,6 @@ class DataGame {
         }
         
         return $html_juego;
-        
     }
     
     /*
@@ -197,11 +187,9 @@ class DataGame {
      * Descripción
      * Borramos de la sesión el objeto del juego para empezar otra vez
      * */
-    
-    public function delete_() {
-        
-        Session::forget('array_data');
-        
+    public function delete_() 
+    {
+        Session::forget('data_game'); 
     }
     
     /*
@@ -209,23 +197,20 @@ class DataGame {
      * Descripción
      * Asignamos una nueva palabra para jugar a cada jugador y empezamos a jugar
      * */
-    
-    public function restart_($array_data) {
-        
+    public function restart_($data_game) 
+    {
         $General = new General();
         
-        $array_data["juego_empezado"] = 1;
+        $data_game["started"] = 1;
         $array_personajes = $General->get_data_to_game();
-        $array_personajes_random = array_rand($array_personajes, count($array_data["jugadores"]));
-        foreach($array_data["jugadores"] as $ind_jug=>$jug) {
-            $array_data["jugadores"][$ind_jug]["status"] = 0;
-            $array_data["jugadores"][$ind_jug]["trys"] = 5;
-            $array_data["jugadores"][$ind_jug]["abc"] = $General->get_alphachar();
-            $array_data["jugadores"][$ind_jug]["word"] = strtoupper($array_personajes[$array_personajes_random[$ind_jug-1]]);
-            $array_data["jugadores"][$ind_jug]["word_keygen"] = $this->get_string_keygen($array_data["jugadores"][$ind_jug]["word"]);
+        $array_personajes_random = array_rand($array_personajes, count($data_game["jugadores"]));
+        foreach($data_game["jugadores"] as $ind_jug=>$jug) {
+            $data_game["jugadores"][$ind_jug]["status"] = 0;
+            $data_game["jugadores"][$ind_jug]["trys"] = 5;
+            $data_game["jugadores"][$ind_jug]["abc"] = $General->get_alphachar();
+            $data_game["jugadores"][$ind_jug]["word"] = strtoupper($array_personajes[$array_personajes_random[$ind_jug-1]]);
+            $data_game["jugadores"][$ind_jug]["word_keygen"] = $this->get_string_keygen($data_game["jugadores"][$ind_jug]["word"]);
         }
-        Session::put('array_data', $array_data);
-        
+        Session::put('data_game', $data_game);
     }
-    
 }
