@@ -1,0 +1,10 @@
+services:
+  web:
+    build: .
+    container_name: dinowebb.penjat-marvel
+    ports:
+      - "8002:80"
+    volumes:
+      - .:/var/www/html
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
